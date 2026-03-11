@@ -11,6 +11,25 @@ Extended fork of `ahujasid/ableton-mcp` with a wider Ableton Remote Script bridg
 - `execute_ableton_command` MCP tool for calling any exposed bridge command directly
 - JSON-safe bridge responses for richer Live object telemetry
 
+## Capability Matrix
+
+This is the practical runtime status of the bridge, not just what exists in source.
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Song/session telemetry | Validated | `get_song_overview`, `get_song_state`, `get_scenes`, `get_visible_tracks` |
+| Track and mixer telemetry | Validated | `get_track_info`, `get_track_mixer`, `get_track_view`, `get_track_sends`, `get_track_routing` |
+| Clip-slot telemetry | Validated | `get_clip_slot_info`, `select_clip_slot`, `fire_clip_slot` |
+| Scene operations | Validated | create, delete, inspect, select, fire |
+| Song setters | Validated | loop, signature, groove, swing, root note, scale name, scale mode |
+| Device and parameter control | Validated | device parameter reads/writes and topology inspection |
+| Generic passthrough | Validated | `get_supported_commands`, `execute_ableton_command` |
+| Session clip automation | Validated | clip-bound automation via bridge commands |
+| Arrangement automation recording | Partial | available, but depends on Live transport and record state |
+| Arrangement breakpoint editing | Blocked by API | no clean public Live API for direct breakpoint CRUD |
+| `Song.View.selected_parameter` writes | Read-only in practice | Live reports no setter |
+| `exclusive_arm` / `exclusive_solo` writes | Read-only in practice | readable, setter blocked on tested build |
+
 ## Current Limits
 
 - Direct Arrangement breakpoint CRUD is still not exposed cleanly by Ableton's public API
@@ -186,6 +205,11 @@ Select a clip slot:
 uv sync
 uv run python -m MCP_Server.server
 ```
+
+## Release Notes
+
+- Current public release: `1.1.0`
+- See [CHANGELOG.md](https://github.com/Kbediako/ableton-mcp-extended/blob/main/CHANGELOG.md) for release history
 
 ## Attribution
 

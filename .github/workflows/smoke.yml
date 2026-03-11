@@ -1,0 +1,52 @@
+name: smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Compile Python entrypoints
+        run: |
+          python -m py_compile MCP_Server/server.py
+          python -m py_compile AbletonMCP_Remote_Script/__init__.py
+
+      - name: Verify extended surfaces are present
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          import MCP_Server.server as server
+
+          remote = Path("AbletonMCP_Remote_Script/__init__.py").read_text()
+          commands = sorted(set(re.findall(r'command_type == \"([^\"]+)\"', remote)))
+
+          assert hasattr(server, "get_supported_commands")
+          assert hasattr(server, "execute_ableton_command")
+          assert server._is_modifying_command("set_song_loop")
+          assert "get_supported_commands" in commands
+          assert "execute_ableton_command" not in commands
+          assert "select_clip_slot" in commands
+          assert "fire_clip_slot" in commands
+          assert "set_song_signature" in commands
+          assert len(commands) >= 160
+          print("bridge command count:", len(commands))
+          PY
